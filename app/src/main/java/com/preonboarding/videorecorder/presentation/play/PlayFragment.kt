@@ -13,6 +13,7 @@ import com.preonboarding.videorecorder.databinding.FragmentPlayBinding
 import com.preonboarding.videorecorder.presentation.MainViewModel
 import com.preonboarding.videorecorder.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class PlayFragment : BaseFragment<FragmentPlayBinding>(R.layout.fragment_play) {
@@ -38,7 +39,7 @@ class PlayFragment : BaseFragment<FragmentPlayBinding>(R.layout.fragment_play) {
     }
 
     private fun collectFlow() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 playVideoModel.selectedVideo.collect { video ->
                     // TODO 선택된 비디오 ExoPlayer와 작업 필요

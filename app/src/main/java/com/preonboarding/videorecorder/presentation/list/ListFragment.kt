@@ -13,6 +13,7 @@ import com.preonboarding.videorecorder.domain.model.Video
 import com.preonboarding.videorecorder.presentation.MainViewModel
 import com.preonboarding.videorecorder.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
@@ -24,7 +25,7 @@ class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
     }
 
     private fun collectFlow() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 listViewModel.videoList.collect { videoList ->
                     // TODO 비디오 리스트 변경시 어댑터 리스트 업데이트 필요
