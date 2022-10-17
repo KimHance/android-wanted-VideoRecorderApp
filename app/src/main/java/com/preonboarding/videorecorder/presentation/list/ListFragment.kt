@@ -14,6 +14,7 @@ import com.preonboarding.videorecorder.presentation.MainViewModel
 import com.preonboarding.videorecorder.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @AndroidEntryPoint
 class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
@@ -22,6 +23,8 @@ class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         collectFlow()
+
+        Timber.e("MESSAGE")
     }
 
     private fun collectFlow() {

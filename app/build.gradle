@@ -68,9 +68,6 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:$glide_version"
     annotationProcessor "com.github.bumptech.glide:compiler:$glide_version"
 
-    // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-
     // Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
@@ -86,4 +83,7 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer-core:$player_version"
     implementation "com.google.android.exoplayer:exoplayer-dash:$player_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$player_version"
+
+    // Timber
+    implementation "com.jakewharton.timber:timber:$timber_version"
 }
