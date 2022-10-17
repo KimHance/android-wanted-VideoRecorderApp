@@ -1,6 +1,7 @@
 package com.preonboarding.videorecorder.presentation
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.preonboarding.videorecorder.domain.model.Video
 import com.preonboarding.videorecorder.domain.usecase.DeleteVideoUseCase
 import com.preonboarding.videorecorder.domain.usecase.GetVideoListUseCase
@@ -8,6 +9,7 @@ import com.preonboarding.videorecorder.domain.usecase.UploadVideoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,4 +25,9 @@ class MainViewModel @Inject constructor(
     private val _selectedVideo = MutableStateFlow<Video>(Video())
     val selectedVideo = _selectedVideo.asStateFlow()
 
+    fun setSelectedVideo(video: Video) {
+        viewModelScope.launch {
+            _selectedVideo.value = video
+        }
+    }
 }
