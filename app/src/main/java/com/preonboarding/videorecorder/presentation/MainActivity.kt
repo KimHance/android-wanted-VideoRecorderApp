@@ -1,12 +1,16 @@
 package com.preonboarding.videorecorder.presentation
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.preonboarding.videorecorder.R
+import androidx.appcompat.app.AppCompatActivity
+import com.preonboarding.videorecorder.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+    private val binding: ActivityMainBinding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
     }
 }
