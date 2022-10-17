@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "816845224999",
+    "project_id": "wanted-videorecorderapp",
+    "storage_bucket": "wanted-videorecorderapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:816845224999:android:a733c2d7b07029c46b6202",
+        "android_client_info": {
+          "package_name": "com.preonboarding.videorecorder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "816845224999-4a8f1qbmmajfaqvrrocj8mg28cc3d6eb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAl8yOu5lryAvvmmVo8p1skXqDrZYKxw2s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "816845224999-4a8f1qbmmajfaqvrrocj8mg28cc3d6eb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
