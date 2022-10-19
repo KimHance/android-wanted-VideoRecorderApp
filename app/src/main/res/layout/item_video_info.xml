@@ -5,6 +5,10 @@
 
     <data>
 
+        <variable
+            name="video"
+            type="com.preonboarding.videorecorder.domain.model.Video" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -33,6 +37,7 @@
                     android:id="@+id/iv_video_thumbnail"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
+                    android:contentDescription="@null"
                     android:scaleType="centerCrop"
                     android:src="@mipmap/ic_launcher"
                     app:layout_constraintDimensionRatio="2:1"
@@ -45,6 +50,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:text="@{video.title}"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="@id/iv_video_thumbnail"

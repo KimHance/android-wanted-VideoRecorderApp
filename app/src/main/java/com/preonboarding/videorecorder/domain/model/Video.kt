@@ -1,10 +1,11 @@
 package com.preonboarding.videorecorder.domain.model
 
-import java.io.Serializable
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-// TODO 쓰시는분이 수정
+@Parcelize
 data class Video(
-    val date: String = "",
-    val uri: String = "",
-    //val duration : String = ""
-) : Serializable
+    val date: String,
+    val title: String = "asdf",
+    val videoUrl: String
+) : Parcelable

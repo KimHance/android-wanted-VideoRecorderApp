@@ -20,11 +20,27 @@ import timber.log.Timber
 class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
     private val listViewModel: MainViewModel by activityViewModels()
 
+    private val videoAdapter by lazy {
+        VideoAdapter(
+            onItemClicked = {
+                doOnClick(it)
+            },
+            onItemLongClicked = {
+                doOnLongClick(it)
+            }
+        )
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         collectFlow()
 
-        Timber.e("MESSAGE")
+        initView()
+        listViewModel.getVideo_Test()
+    }
+
+    private fun initView() {
+        binding.rvVideoList.adapter = videoAdapter
     }
 
     private fun collectFlow() {
@@ -44,5 +60,9 @@ class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
                 video
             )
         requireView().findNavController().navigate(action)
+    }
+
+    private fun doOnLongClick(url: String) {
+
     }
 }
