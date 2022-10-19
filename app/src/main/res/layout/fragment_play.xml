@@ -4,7 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-
+        <variable
+            name="fragment"
+            type="com.preonboarding.videorecorder.presentation.play.PlayFragment" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -12,6 +14,7 @@
         android:layout_height="match_parent">
 
         <ImageView
+            android:onClick="@{fragment::setBackButton}"
             android:id="@+id/iv_play_back"
             android:layout_width="30dp"
             android:layout_height="30dp"
@@ -22,11 +25,11 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="플레이화면 입니다."
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/pv_play_video"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:show_timeout="3000"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
