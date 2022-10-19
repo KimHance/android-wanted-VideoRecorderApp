@@ -1,6 +1,5 @@
 package com.preonboarding.videorecorder.presentation.play
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
@@ -23,16 +22,22 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class PlayFragment : BaseFragment<FragmentPlayBinding>(R.layout.fragment_play) {
     private val playVideoModel: MainViewModel by activityViewModels()
-    private val navArgs: PlayFragmentArgs by navArgs()
 
+    //TODO 영화목록 연결할 때 아래 주석 해제하기
+    private val navArgs: PlayFragmentArgs by navArgs()
+    //private var uri: String = ""
+
+    //TODO 영화목록 연결할 때 테스트용인 아래 세문장 지우기
     private val testUri =
         "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"
     private val testVideo = Video("", testUri)
     private var uri: String = testUri
+
     private var exoPlayer: ExoPlayer? = null
     private var exoPlayWhenReady = true
     private var exoCurrentWindow = 0
     private var exoPlaybackPosition = 0L
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.fragment = this@PlayFragment
@@ -55,15 +60,15 @@ class PlayFragment : BaseFragment<FragmentPlayBinding>(R.layout.fragment_play) {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 playVideoModel.selectedVideo.collect { video ->
                     uri = video.uri
-                    setExoPlayer()
                 }
             }
         }
     }
 
     private fun getSelectedVideo() {
+        //TODO 영화목록 연결 시 아래 주석해제하고 테스트용 문장 지우기
         //playVideoModel.setSelectedVideo(navArgs.video)
-        playVideoModel.setSelectedVideo(testVideo)
+        playVideoModel.setSelectedVideo(testVideo) //테스트용
         collectFlow()
     }
 
@@ -79,6 +84,20 @@ class PlayFragment : BaseFragment<FragmentPlayBinding>(R.layout.fragment_play) {
             release()
         }
         exoPlayer = null
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (Util.SDK_INT >= 24) {
+            setExoPlayer()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if ((Util.SDK_INT < 24 || exoPlayer == null)) {
+            setExoPlayer()
+        }
     }
 
     override fun onPause() {
