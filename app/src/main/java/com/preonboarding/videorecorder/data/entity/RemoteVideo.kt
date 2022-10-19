@@ -7,7 +7,7 @@ package com.preonboarding.videorecorder.data.entity
  * @desc
  */
 data class RemoteVideo(
-    val fileName: String,
-    val downloadUrl: String,
-    val file: String
+    val videoName: String,
+    val videoTimeStamp: String,
+    val downloadUrl: String
 )

@@ -24,7 +24,7 @@ class PlayFragment : BaseFragment<FragmentPlayBinding>(R.layout.fragment_play) {
         super.onViewCreated(view, savedInstanceState)
         // 선택된 비디오 세팅
         //getSelectedVideo()
-        collectFlow()
+//        collectFlow()
         initView()
     }
 
@@ -38,17 +38,17 @@ class PlayFragment : BaseFragment<FragmentPlayBinding>(R.layout.fragment_play) {
         }
     }
 
-    private fun collectFlow() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                playVideoModel.selectedVideo.collect { video ->
-                    // TODO 선택된 비디오 ExoPlayer와 작업 필요
-                }
-            }
-        }
-    }
-
-    private fun getSelectedVideo() {
-        playVideoModel.setSelectedVideo(navArgs.video)
-    }
+//    private fun collectFlow() {
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                playVideoModel.selectedVideo.collect { video ->
+//                    // TODO 선택된 비디오 ExoPlayer와 작업 필요
+//                }
+//            }
+//        }
+//    }
+//
+//    private fun getSelectedVideo() {
+//        playVideoModel.setSelectedVideo(navArgs.video)
+//    }
 }
