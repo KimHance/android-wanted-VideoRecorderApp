@@ -23,12 +23,18 @@ class MainViewModel @Inject constructor(
     private val _videoList = MutableStateFlow<List<Video>>(emptyList())
     val videoList = _videoList.asStateFlow()
 
-    private val _selectedVideo = MutableStateFlow<Video>(Video())
-    val selectedVideo = _selectedVideo.asStateFlow()
+//    private val _selectedVideo = MutableStateFlow<Video>(Video())
+//    val selectedVideo = _selectedVideo.asStateFlow()
+//
+//    fun setSelectedVideo(video: Video) {
+//        viewModelScope.launch {
+//            _selectedVideo.value = video
+//        }
+//    }
 
-    fun setSelectedVideo(video: Video) {
+    fun getVideo_Test() {
         viewModelScope.launch {
-            _selectedVideo.value = video
+            getVideoListUseCase.invoke()
         }
     }
 
