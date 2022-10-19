@@ -37,9 +37,9 @@ class MainViewModel @Inject constructor(
             runCatching {
                 uploadVideoUseCase(video)
             }.onSuccess {
-                Log.d("Upload", "uploadVideo: SUCCES")
+                //Log.d("Upload", "uploadVideo: SUCCES")
             }.onFailure {
-                Log.d("Upload", "uploadVideo: FAIL")
+                //Log.d("Upload", "uploadVideo: FAIL")
             }
         }
     }

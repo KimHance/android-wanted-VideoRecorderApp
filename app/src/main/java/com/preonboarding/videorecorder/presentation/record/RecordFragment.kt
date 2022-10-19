@@ -4,16 +4,18 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.pm.PackageManager
+import android.database.Cursor
+import android.media.AudioAttributes
+import android.media.SoundPool
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.CameraX
-import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
-import androidx.camera.core.impl.PreviewConfig
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
 import androidx.core.app.ActivityCompat
@@ -22,6 +24,7 @@ import androidx.core.content.PermissionChecker
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
 import com.preonboarding.videorecorder.R
+import com.preonboarding.videorecorder.const.FILENAME_FORMAT
 import com.preonboarding.videorecorder.const.REQUEST_CODE_PERMISSIONS
 import com.preonboarding.videorecorder.const.REQUIRED_PERMISSIONS
 import com.preonboarding.videorecorder.const.TAG
@@ -29,7 +32,11 @@ import com.preonboarding.videorecorder.databinding.FragmentRecordBinding
 import com.preonboarding.videorecorder.domain.model.Video
 import com.preonboarding.videorecorder.presentation.MainViewModel
 import com.preonboarding.videorecorder.presentation.base.BaseFragment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -41,55 +48,82 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
     private var recording: Recording? = null
     private lateinit var cameraExecutor: ExecutorService
     private var cameraFacing = CameraSelector.DEFAULT_BACK_CAMERA
+    var pauseTime = 0L
+    private var soundpool: SoundPool? = null
+    private var sound: Int = 0
+    private lateinit var name:String
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initView()
+        initSound()
+
         if (checkPermissions()) {
             initCamera(cameraFacing)
-
         } else {
             ActivityCompat.requestPermissions(
                 requireActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
-        binding.btnRecord.setOnClickListener {
-            startRecord()
-        }
-        binding.btnStop.setOnClickListener {
-            val curRecording = recording
-            if (curRecording != null) {
-                curRecording.stop()
-                recording = null
-            }
-        }
-        binding.btnSwitch.setOnClickListener {
-            if (cameraFacing == CameraSelector.DEFAULT_FRONT_CAMERA) {
-                cameraFacing = CameraSelector.DEFAULT_BACK_CAMERA
-                Snackbar.make(
-                    requireView(),
-                    "Switch",
-                    Snackbar.LENGTH_SHORT
-                ).show()
-                initCamera(cameraFacing)
-            }
-            else{
-                cameraFacing = CameraSelector.DEFAULT_FRONT_CAMERA
-                Snackbar.make(
-                    requireView(),
-                    "Switch",
-                    Snackbar.LENGTH_SHORT
-                ).show()
-                initCamera(cameraFacing)
-            }
-            try {
-
-            }
-            catch (_: Exception) { }
-        }
-
-
         cameraExecutor = Executors.newSingleThreadExecutor()
+    }
+
+    private fun initSound() {
+        soundpool = SoundPool.Builder()
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            .setMaxStreams(10)
+            .build()
+        sound = soundpool?.load(requireContext(), R.raw.alert, 1)!!
+    }
+
+    private fun releaseSound() {
+        val sp = soundpool ?: return
+        CoroutineScope(Dispatchers.Default).launch {
+            sp.release()
+        }
+        soundpool = null
+    }
+
+    private fun initView() {
+        binding.apply {
+            btnRecord.setOnClickListener {
+                startRecord()
+            }
+            btnStop.setOnClickListener {
+                val curRecording = recording
+                if (curRecording != null) {
+                    curRecording.stop()
+                    recording = null
+                }
+                binding.chronometer.stop()
+                pauseTime = binding.chronometer.base
+            }
+            btnSwitch.setOnClickListener {
+                if (cameraFacing == CameraSelector.DEFAULT_FRONT_CAMERA) {
+                    cameraFacing = CameraSelector.DEFAULT_BACK_CAMERA
+                    Snackbar.make(
+                        requireView(),
+                        "Switch",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                    initCamera(cameraFacing)
+                } else {
+                    cameraFacing = CameraSelector.DEFAULT_FRONT_CAMERA
+                    Snackbar.make(
+                        requireView(),
+                        "Switch",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                    initCamera(cameraFacing)
+                }
+            }
+        }
     }
 
 
@@ -113,13 +147,12 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                     "Permissions not granted by the user.",
                     Snackbar.LENGTH_SHORT
                 ).show()
-
             }
         }
     }
 
     //@RequiresPermission(Manifest.permission.CAMERA)
-    private fun initCamera(cameraFacing:CameraSelector) {
+    private fun initCamera(cameraFacing: CameraSelector) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
         cameraProviderFuture.addListener({
@@ -130,7 +163,6 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                     it.setSurfaceProvider(binding.cameraView.surfaceProvider)
                 }
             val cameraSelector = cameraFacing
-
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
@@ -142,7 +174,6 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
-
         }, ContextCompat.getMainExecutor(requireContext()))
 
         val recorder = Recorder.Builder()
@@ -150,8 +181,35 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
             .build()
         videoCapture = VideoCapture.withOutput(recorder)
     }
+    private fun bindCamera(cameraFacing: CameraSelector) {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
+        cameraProviderFuture.addListener({
+            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            val preview = Preview.Builder()
+                .build()
+                .also {
+                    it.setSurfaceProvider(binding.cameraView.surfaceProvider)
+                }
+            val cameraSelector = cameraFacing
+            try {
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(
+                    viewLifecycleOwner,
+                    cameraSelector,
+                    preview,
+                    videoCapture
+                )
+            } catch (exc: Exception) {
+                Log.e(TAG, "Use case binding failed", exc)
+            }
+        }, ContextCompat.getMainExecutor(requireContext()))
+        val recorder = Recorder.Builder()
+            .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
+            .build()
+        videoCapture = VideoCapture.withOutput(recorder)
 
+    }
 
 
     private fun startRecord() {
@@ -164,7 +222,7 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
             return
         }
 
-        val name = SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(System.currentTimeMillis())
+        name = "Wanted_camera" +SimpleDateFormat("yyyy-MM-dd hh-mm-ss").format(System.currentTimeMillis())
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
@@ -194,7 +252,6 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                 when (recordEvent) {
                     is VideoRecordEvent.Start -> {
                         //영상 녹화 시작시
-                        //TODO 시간 시작
                         binding.apply {
                             btnRecord.isEnabled = false
                             btnRecord.visibility = View.GONE
@@ -204,7 +261,7 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                             btnStop.visibility = View.VISIBLE
 
 
-                            binding.btnPause.setOnClickListener {
+                            btnPause.setOnClickListener {
                                 val curRecording = recording
                                 if (curRecording != null) {
                                     curRecording?.pause()
@@ -212,26 +269,39 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                                     recording = null
                                 }
                             }
+                            chronometer.base = SystemClock.elapsedRealtime()
+                            chronometer.start()
                         }
+                        soundpool?.play(sound, 1f, 1f, 0, 0, 1f)
                     }
                     is VideoRecordEvent.Pause -> {
                         binding.apply {
-                            binding.btnPause.setOnClickListener {
-                                val curRecording = recording
-                                if (curRecording != null) {
-                                    curRecording?.resume()
-                                    //TODO 시간 다시 시작
-                                    recording = null
-                                }
+                            pauseTime = chronometer.base
+                            chronometer.stop()
+                            btnPause.setImageResource(R.drawable.ic_baseline_fiber_manual_record_24)
+                            btnPause.setOnClickListener {
+                                recording?.resume()
                             }
+
+                        }
+                    }
+
+                    is VideoRecordEvent.Resume -> {
+                        binding.apply {
+                            btnPause.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                            //TODO 시간 다시 시작
+                            btnPause.setOnClickListener {
+                                recording?.pause()
+                            }
+                            chronometer.base = pauseTime+SystemClock.elapsedRealtime()
+                            chronometer.start()
                         }
                     }
 
                     is VideoRecordEvent.Finalize -> {
                         if (!recordEvent.hasError()) {
                             //영상 녹화 종료시
-                            //TODO 시간 초기화화
-
+                            //TODO 시간 초기화
                             binding.apply {
                                 btnRecord.isEnabled = true
                                 btnRecord.visibility = View.VISIBLE
@@ -239,10 +309,10 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                                 btnPause.visibility = View.GONE
                                 btnStop.isEnabled = false
                                 btnStop.visibility = View.GONE
+                                chronometer.stop()
+                                chronometer.base = SystemClock.elapsedRealtime()
                             }
-
-                            val msg = "Video capture succeeded: " +
-                                    "${recordEvent.outputResults.outputUri}"
+                            val msg = "${recordEvent.outputResults.outputUri}"
                             Snackbar.make(
                                 requireView(),
                                 msg,
@@ -252,7 +322,15 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                             val nowDate =
                                 SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(System.currentTimeMillis())
                                     .toString()
-                            //saveFireBase()
+
+                            recordedVideo = Video(
+                                nowDate,getPath(recordEvent.outputResults.outputUri)
+                            )
+                            Log.d(TAG, "$nowDate : $recordEvent.outputResults.outputUri.toString()")
+                            soundpool?.play(sound, 1f, 1f, 0, 0, 1f)
+                            pauseTime = 0L
+
+                        saveFireBase()
                         } else {
                             recording?.close()
                             recording = null
@@ -265,6 +343,18 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                 }
             }
     }
+    @SuppressLint("Range")
+    private fun getPath(uri: Uri): String {
+        val cursor: Cursor? = requireContext().contentResolver.query(uri, null, null, null, null )
+
+        cursor?.moveToNext()
+
+        val path: String? = cursor?.getString(cursor.getColumnIndex("_data"))
+
+        cursor?.close()
+
+        return path?:""
+    }
 
 
     private fun saveFireBase() {
@@ -274,8 +364,9 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+        binding.chronometer.stop()
+        releaseSound()
     }
-
 
 
 }

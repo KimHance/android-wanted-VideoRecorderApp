@@ -11,14 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".presentation.record.RecordFragment">
-        <TextClock
-            android:layout_marginTop="50dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:id="@+id/textclock"/>
+
+
 
         <androidx.camera.view.PreviewView
             android:id="@+id/camera_view"
@@ -38,6 +32,22 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
+            <Chronometer
+                android:countDown="false"
+                android:textColor="@color/black"
+                android:gravity="center"
+                android:format="%s"
+                android:id="@+id/chronometer"
+                android:layout_width="0dp"
+                android:textStyle="bold"
+                android:textSize="24sp"
+                android:padding="8dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/btn_record"
                 android:layout_width="70dp"
@@ -51,26 +61,26 @@
                 app:layout_constraintTop_toTopOf="@id/constarint" />
 
             <androidx.appcompat.widget.AppCompatImageButton
-                android:visibility="gone"
                 android:id="@+id/btn_pause"
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:background="@color/white"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_baseline_pause_circle_outline_24"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/btn_stop"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@id/constarint" />
 
             <androidx.appcompat.widget.AppCompatImageButton
-                android:visibility="gone"
                 android:id="@+id/btn_stop"
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:background="@color/white"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_baseline_stop_circle_24"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/btn_pause"
