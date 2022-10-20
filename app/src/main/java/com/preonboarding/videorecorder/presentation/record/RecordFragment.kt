@@ -327,7 +327,7 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                             Log.d(TAG, "$nowDate : $recordEvent.outputResults.outputUri.toString()")
                             soundpool?.play(sound, 1f, 1f, 0, 0, 1f)
                             pauseTime = 0L
-                            saveFireBase()
+                            saveFireBase(recordedVideo)
                         } else {
                             recording?.close()
                             recording = null
