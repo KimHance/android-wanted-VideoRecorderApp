@@ -321,7 +321,7 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                                 SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(System.currentTimeMillis())
                                     .toString()
 
-                            recordedVideo = Video(
+                            val recordedVideo = Video(
                                 nowDate, getPath(recordEvent.outputResults.outputUri)
                             )
                             Log.d(TAG, "$nowDate : $recordEvent.outputResults.outputUri.toString()")
