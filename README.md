@@ -53,8 +53,13 @@ private fun collectFlow() {
 }
 ```
 
-- ExoPlayer2를 이용해 ExoPlayer 객체를 생성하고 재생할 영상의 uri가진 MediaItem을 추가합니다
+- setExoPlayer() -> ExoPlayer2를 이용해 ExoPlayer 객체를 생성하고 재생할 영상의 uri가진 MediaItem을 추가합니다
+- releasePlayer() -> 플레이어가 포커스를 잃으면 리소스를 해제하고 그 때의 정보를 저장합니다
 ```kotlin
+private var exoPlayWhenReady = true
+private var exoCurrentWindow = 0
+private var exoPlaybackPosition = 0L
+    
 private fun setExoPlayer() {
     val mediaItem = MediaItem.fromUri(uri)
     exoPlayer = ExoPlayer.Builder(requireContext()).build().also {
@@ -65,10 +70,6 @@ private fun setExoPlayer() {
         it.prepare()
     }
 }
-```
-
-- 플레이어가 포커스를 잃으면 리소스를 해제하고 그 때의 정보를 저장합니다
-```kotlin
 private fun releasePlayer() {
     exoPlayer?.run {
         exoPlaybackPosition = this.currentPosition
