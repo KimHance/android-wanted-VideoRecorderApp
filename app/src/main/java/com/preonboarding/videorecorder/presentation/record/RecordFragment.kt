@@ -44,7 +44,6 @@ import java.util.concurrent.Executors
 
 class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_record) {
     private val recordVideoModel: MainViewModel by activityViewModels()
-    private lateinit var recordedVideo: Video
     private var videoCapture: VideoCapture<Recorder>? = null
     private var recording: Recording? = null
     private lateinit var cameraExecutor: ExecutorService
