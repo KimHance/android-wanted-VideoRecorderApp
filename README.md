@@ -112,8 +112,146 @@ override fun onStop() {
 ```
 
 
-### 황준성
+## 황준성
 
+
+### **역할**
+
+- 맡은 일
+    - 카메라를 통한 영상 녹화
+    - 전면, 후면 카메라 변경
+    - 녹화한 영상 저장
+    - Firebase storage를 이용하여 녹화한 영상 백업
+- 기여한 점
+    - CameraX 를 사용한 동영상 녹화 기능 구현
+    - Firebase storage를 이용하여 녹화한 영상 백업
+- 남은 일
+    - 현재 전면,후면 카메라 변경이 녹화도중에 실행시 녹화가 중단되어 수정중입니다.
+- 실행영상
+
+- 구현
+    - 카메라를 통한 영상 녹화
+
+Camera X를 사용한 동영상 녹화 기능 구현
+
+녹화화면을 보여줌과 동시에 녹화가 진행해야 하므로 CameraX의 프리뷰와 동영상 녹화 UseCase를 함께 bind 시켜준다.
+
+```kotlin
+private fun initCamera(cameraFacing: CameraSelector) {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
+        cameraProviderFuture.addListener({
+            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            val preview = Preview.Builder()
+                .build()
+                .also {
+                    it.setSurfaceProvider(binding.cameraView.surfaceProvider) }
+            val cameraSelector = cameraFacing
+
+            try {
+                cameraProvider.unbindAll()
+
+                val myCamera = cameraProvider.bindToLifecycle(
+                    viewLifecycleOwner,
+                    cameraSelector,
+                    preview,
+                    videoCapture
+                )
+            } catch (exc: Exception) {
+                Log.e(TAG, "Use case binding failed", exc)
+            }
+        }, ContextCompat.getMainExecutor(requireContext()))
+
+        val recorder = Recorder.Builder()
+            .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
+            .build()
+        videoCapture = VideoCapture.withOutput(recorder)
+    }
+```
+
+VideoRecordEvent리스너로 start(),pause,resume(),stop()의 이벤트를 제어한다.
+
+```kotlin
+is VideoRecordEvent.Pause -> {
+                        binding.apply {
+                            pauseTime = chronometer.base
+                            chronometer.stop()
+                            btnPause.setImageResource(R.drawable.ic_baseline_fiber_manual_record_24)
+                            btnPause.setOnClickListener {
+                                recording?.resume()
+                            }
+
+                        }
+                    }
+
+is VideoRecordEvent.Resume -> {
+                        binding.apply {
+                            btnPause.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                            btnPause.setOnClickListener {
+                                recording?.pause()
+                            }
+                            chronometer.base = (SystemClock.elapsedRealtime()+pauseTime)
+                            chronometer.start()
+                        }
+                    }
+```
+
+- 전면, 후면 카메라 변경
+
+카메라 생성시 카메라의 방향을 수정해준다.
+
+```kotlin
+
+private var myCameraFacing = CameraSelector.DEFAULT_BACK_CAMERA
+
+binding.btnSwitch.setOnClickListener {
+                if (myCameraFacing == CameraSelector.DEFAULT_FRONT_CAMERA) {
+                    myCameraFacing = CameraSelector.DEFAULT_BACK_CAMERA
+                    initCamera(myCameraFacing)
+                } else {
+                    myCameraFacing = CameraSelector.DEFAULT_FRONT_CAMERA
+                    initCamera(myCameraFacing)
+                }
+            }
+
+```
+
+- 녹화한 영상 저장
+
+카메라의 이름,타입,경로 를 지정해주고, 영상 녹화 종료시에 해당 경로에 영상이 저장되게 한다.
+
+```kotlin
+name = "Wanted_camera" + SimpleDateFormat("yyyy-MM-dd hh-mm-ss").format(System.currentTimeMillis())
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+            put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/Wanted-Video")
+            }
+        }
+
+val mediaStoreOutputOptions = MediaStoreOutputOptions
+            .Builder(requireActivity().contentResolver, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+            .setContentValues(contentValues)
+            .build()
+```
+
+- Firebase storage를 이용하여 녹화한 영상 백업
+
+```kotlin
+override suspend fun uploadVideo(video: Video) {
+        ref.child("test").child(video.date).putFile(
+            Uri.fromFile(File(video.uri))
+        ).addOnSuccessListener {
+            Log.d("UPLOAD SUCCESS", "uploadVideo: ${video.uri}")
+        }.addOnFailureListener {
+            Log.d("UPLOAD FAIL", it.message.toString())
+        }
+    }
+```
+
+
+
+https://user-images.githubusercontent.com/55780312/196967608-97dbb64f-b42e-451b-9040-922ba2ef5f96.mp4
 
 
 
