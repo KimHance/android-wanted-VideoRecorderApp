@@ -1,5 +1,6 @@
 package com.preonboarding.videorecorder.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.preonboarding.videorecorder.domain.model.Video
@@ -30,4 +31,17 @@ class MainViewModel @Inject constructor(
             _selectedVideo.value = video
         }
     }
+
+    fun uploadVideo(video: Video) {
+        viewModelScope.launch {
+            runCatching {
+                uploadVideoUseCase(video)
+            }.onSuccess {
+                //Log.d("Upload", "uploadVideo: SUCCES")
+            }.onFailure {
+                //Log.d("Upload", "uploadVideo: FAIL")
+            }
+        }
+    }
+
 }

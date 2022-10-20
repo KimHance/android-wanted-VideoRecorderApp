@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_listFragment_to_playFragment"
             app:destination="@id/playFragment" />
+        <action
+            android:id="@+id/action_listFragment_to_recordFragment"
+            app:destination="@id/recordFragment" />
     </fragment>
     <fragment
         android:id="@+id/playFragment"
@@ -22,5 +25,11 @@
         <argument
             android:name="video"
             app:argType="com.preonboarding.videorecorder.domain.model.Video" />
+    </fragment>
+    <fragment
+        android:id="@+id/recordFragment"
+        android:name="com.preonboarding.videorecorder.presentation.record.RecordFragment"
+        android:label="RecordFragment"
+        tools:layout="@layout/fragment_record" >
     </fragment>
 </navigation>
