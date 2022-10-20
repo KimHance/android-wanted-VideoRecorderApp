@@ -35,11 +35,10 @@
 - video 객체를 뷰모델에서 관리할 수 있도록 합니다
 ```kotlin
 private val navArgs: PlayFragmentArgs by navArgs()
+private var uri: String = testUri
 
 private fun getSelectedVideo() {
-    //TODO 영화목록 연결 시 아래 주석해제하고 테스트용 문장 지우기
-    //playVideoModel.setSelectedVideo(navArgs.video)
-    playVideoModel.setSelectedVideo(testVideo) //테스트용
+    playVideoModel.setSelectedVideo(navArgs.video)
     collectFlow()
 }
 private fun collectFlow() {
