@@ -350,7 +350,7 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
         return path ?: ""
     }
 
-    private fun saveFireBase() {
+    private fun saveFireBase(recordedVideo: Video) {
         recordVideoModel.uploadVideo(recordedVideo)
     }
 
