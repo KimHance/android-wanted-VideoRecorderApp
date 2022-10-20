@@ -23,6 +23,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:layout_margin="16dp"
+            android:background="@android:color/transparent"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/constarint"
+            android:id="@+id/seekbar"/>
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constarint"
             android:layout_width="0dp"
@@ -96,6 +106,7 @@
                 android:src="@drawable/ic_baseline_cameraswitch_24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 

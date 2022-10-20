@@ -20,8 +20,7 @@ class FirebaseRepositoryImpl @Inject constructor(
     }
 
     override suspend fun uploadVideo(video: Video) {
-        Log.d("UPLOAD", video.uri)
-        ref.child("test").putFile(
+        ref.child("test").child(video.date).putFile(
             Uri.fromFile(File(video.uri))
         ).addOnSuccessListener {
             Log.d("UPLOAD SUCCESS", "uploadVideo: ${video.uri}")
