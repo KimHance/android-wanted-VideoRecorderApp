@@ -10,7 +10,167 @@
     </tr>
 </table>
 
+## 기술 스택
+- MVVM + Cleanarchitecture
+- dataBinding
+- Coroutine + Flow
+- Hilt
+- Glide
+- Firebase Storage
+- ExoPlayer
+- CameraX
+
+## 패키지
+```
+└─videorecorder
+    ├─const
+    ├─data
+    │  ├─datasource
+    │  │  └─impl
+    │  └─repositoryimpl
+    ├─di
+    ├─domain
+    │  ├─model
+    │  ├─repository
+    │  └─usecase
+    ├─presentation
+    │  ├─base
+    │  ├─list
+    │  │  └─adapter
+    │  ├─play
+    │  │  └─adapter
+    │  └─record
+    └─utils
+```
+
 ## 김현수
+
+### 역할
+- 프로젝트 베이스세팅
+- DI 모듈 세팅
+- 네비게이션 세팅
+
+### DI 모듈 세팅
+- 디스패처 모듈
+```kotlin
+@Module
+@InstallIn(SingletonComponent::class)
+class DispatcherModule {
+    @Provides
+    @DispatcherIO
+    fun provideDispatcherIO(): CoroutineDispatcher = Dispatchers.IO
+
+    @Provides
+    @DispatcherMain
+    fun provideDispatcherMain(): CoroutineDispatcher = Dispatchers.Main
+
+    @Provides
+    @DispatcherDefault
+    fun provideDispatcherDefault(): CoroutineDispatcher = Dispatchers.Default
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class DispatcherIO
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class DispatcherMain
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class DispatcherDefault
+}
+```
+- 파이어베이스 스토리지 모듈
+```kotlin
+@Module
+@InstallIn(SingletonComponent::class)
+class FirebaseModule {
+
+    @Provides
+    @Singleton
+    fun provideFirebaseStorage() = FirebaseStorage.getInstance()
+}
+```
+- 데이터 소스와 레포지토리 모듈
+```kotlin
+// DataSourceModule
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class DataSourceModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindFirebaseDataSource(
+        impl: FirebaseDataSourceImpl
+    ): FirebaseDataSource
+}
+// RepositoryModule
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindFirebaseRepository(
+        impl: FirebaseRepositoryImpl
+    ): FirebaseRepository
+}
+```
+### 네비게이션 세팅
+- 네비게이션 그래프
+<img src="https://user-images.githubusercontent.com/86879099/196983592-606809cb-23ff-4a93-8ab2-537fbb4f0579.png" width="600" height="600"/>
+- 액션을 통해 Video 객체 전달
+
+```kotlin
+ private fun doOnClick(video: Video) {
+        val action =
+            ListFragmentDirections.actionListFragmentToPlayFragment(
+                video
+            )
+        requireView().findNavController().navigate(action)
+    }
+```
+### 그 외
+```kotlin
+// viewModel
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val getVideoListUseCase: GetVideoListUseCase,
+    private val uploadVideoUseCase: UploadVideoUseCase,
+    private val deleteVideoUseCase: DeleteVideoUseCase
+) : ViewModel() {
+
+    private val _videoList = MutableStateFlow<List<Video>>(emptyList())
+    val videoList = _videoList.asStateFlow()
+    
+    private val _selectedVideo = MutableStateFlow<Video>(Video())
+    val selectedVideo = _selectedVideo.asStateFlow()
+
+...
+// ListFragment
+private fun collectFlow() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                listViewModel.videoList.collect { videoList ->
+                    // TODO 비디오 리스트 변경시 어댑터 리스트 업데이트 필요
+                }
+            }
+        }
+    }
+...
+// PlayFragment
+private fun collectFlow() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                playVideoModel.selectedVideo.collect { video ->
+                    // TODO 선택된 비디오 ExoPlayer와 작업 필요
+                }
+            }
+        }
+    }
+```
+- 멤버들이 후에 편하게 작업할 수 있도록 베이스 코드 작성
 ## 이재성
 
 ## 한혜원
