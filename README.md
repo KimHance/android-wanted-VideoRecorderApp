@@ -172,7 +172,144 @@ private fun collectFlow() {
 ```
 - 멤버들이 후에 편하게 작업할 수 있도록 베이스 코드 작성
 ## 이재성
+### 역할
+- 동영상 리스트
+- 동영상 삭제
+- 롱클릭 시 동영상 5초간 재생
 
+### 동영상 리스트
+* 문제 상황
+```kotlin
+class FirebaseRepositoryImpl @Inject constructor(
+    private val firebaseDataSource: FirebaseDataSource
+) : FirebaseRepository {
+    override suspend fun getVideoList() {
+        val videoList = mutableListOf<RemoteVideo>()
+
+        firebaseDataSource.getVideoList().addOnSuccessListener { result ->
+            Timber.e("${result.items.size}")
+            Timber.e("${result.items}")
+            result.items.forEach { reference ->
+                videoList.add(
+                    RemoteVideo(
+                        videoName = reference.name,
+                        downloadUrl = getDownloadUrl(reference.downloadUrl),
+                        videoTimeStamp = getTimeMillis(reference.metadata)
+                    )
+                )
+            }
+        }
+    }
+
+    ...
+
+    private fun getTimeMillis(metadata: Task<StorageMetadata>): String {
+        var timeMillis = ""
+        metadata.addOnSuccessListener { storageMetaData ->
+            timeMillis = storageMetaData.creationTimeMillis.toString()
+        }
+        return timeMillis
+    }
+
+    private fun getDownloadUrl(downloadUrl: Task<Uri>): String {
+        var url = ""
+        downloadUrl.addOnSuccessListener {
+            url = it.toString()
+        }
+        return url
+    }
+}
+```
+- `addOnSuccessListener`, `addOnFailureListener`와 같은 함수들은 비동기적으로 호출됨
+- 비동기 작업을 연쇄적으로 해야하는 경우에는 적합하지 않았음
+
+<br>
+
+* 해결 방법
+```kotlin
+class FirebaseRepositoryImpl @Inject constructor(
+    private val firebaseDataSource: FirebaseDataSource,
+    @DispatcherModule.DispatcherIO private val dispatcherIO: CoroutineDispatcher
+) : FirebaseRepository {
+
+    override suspend fun getVideoList() = callbackFlow {
+        firebaseDataSource.getVideoList()?.items?.forEach { reference ->
+            val downloadUrl = reference.downloadUrl
+            val getMetadata = reference.metadata
+            Tasks.whenAll(
+                downloadUrl,
+                getMetadata
+            ).addOnSuccessListener {
+                trySend(
+                    RemoteVideo(
+                        videoName = reference.name,
+                        videoTimeStamp = getMetadata.result.creationTimeMillis.toString(),
+                        downloadUrl = downloadUrl.result.toString()
+                    )
+                )
+            }
+        }
+        awaitClose()
+    }.flowOn(dispatcherIO)
+    
+    ...
+}
+```
+- `Tasks.whenAll`은 해당 Task가 모두 완료된 경우에만 `addOnSuccessListener`를 수행한다.
+
+### UI
+```kotlin
+class VideoAdapter(
+    private val onItemClicked: (Video) -> Unit,
+    private val onItemLongClicked: (String) -> Unit
+) : ListAdapter<Video, VideoAdapter.VideoViewHolder>(VIDEO_DIFF_CALLBACK) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = ItemVideoInfoBinding.inflate(inflater, parent, false)
+        return VideoViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
+        holder.bindItems(getItem(position), onItemClicked, onItemLongClicked)
+    }
+
+    class VideoViewHolder(private val binding: ItemVideoInfoBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bindItems(
+            item: Video,
+            onItemClicked: (Video) -> Unit,
+            onItemLongClicked: (String) -> Unit
+        ) {
+            with(binding) {
+                video = item
+                executePendingBindings()
+
+                cvVideo.setOnLongClickListener {
+                    onItemLongClicked.invoke(item.videoUrl)
+                    return@setOnLongClickListener true // Long Click 이후 Click 발생 방지
+                }
+
+                cvVideo.setOnClickListener {
+                    onItemClicked.invoke(item)
+                }
+            }
+        }
+    }
+
+    companion object {
+        private val VIDEO_DIFF_CALLBACK = object : DiffUtil.ItemCallback<Video>() {
+            override fun areItemsTheSame(oldItem: Video, newItem: Video): Boolean {
+                return oldItem.hashCode() == newItem.hashCode()  // 수정 필요
+            }
+
+            override fun areContentsTheSame(oldItem: Video, newItem: Video): Boolean {
+                return oldItem == newItem
+            }
+        }
+    }
+}
+```
+---
 ## 한혜원
 
 ### 역할
