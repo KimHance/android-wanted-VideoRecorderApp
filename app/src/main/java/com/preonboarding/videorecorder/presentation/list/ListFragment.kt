@@ -7,6 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.preonboarding.videorecorder.R
 import com.preonboarding.videorecorder.databinding.FragmentListBinding
 import com.preonboarding.videorecorder.domain.model.Video
@@ -41,6 +42,10 @@ class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
 
     private fun initView() {
         binding.rvVideoList.adapter = videoAdapter
+
+        binding.fabRecord.setOnClickListener {
+            findNavController().navigate(R.id.action_listFragment_to_recordFragment)
+        }
     }
 
     private fun collectFlow() {
