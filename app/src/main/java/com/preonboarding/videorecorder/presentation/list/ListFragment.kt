@@ -49,10 +49,25 @@ class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
     }
 
     private fun collectFlow() {
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                listViewModel.videoList.collect { videoList ->
+//                    Timber.e("$videoList")
+//                }
+//            }
+//        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                listViewModel.videoList.collect { videoList ->
-                    Timber.e("$videoList")
+                listViewModel.videoListUiState.collect { uiState ->
+                    when (uiState) {
+                        is VideoUiState.Success -> {
+                            videoAdapter.submitList(uiState.data)
+                        }
+                        is VideoUiState.Loading -> {
+
+                        }
+                    }
                 }
             }
         }
