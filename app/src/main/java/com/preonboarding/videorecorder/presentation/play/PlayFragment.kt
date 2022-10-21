@@ -8,9 +8,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.util.Util
 import com.preonboarding.videorecorder.R
 import com.preonboarding.videorecorder.databinding.FragmentPlayBinding
 import com.preonboarding.videorecorder.domain.model.Video
