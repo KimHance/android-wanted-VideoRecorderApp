@@ -1,6 +1,7 @@
 package com.preonboarding.videorecorder.data.datasource.impl
 
 import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ListResult
 import com.preonboarding.videorecorder.data.datasource.FirebaseDataSource
@@ -16,8 +17,8 @@ class FirebaseDataSourceImpl @Inject constructor(
     private val firebaseRef = firebaseStorage.reference
     private val mockDirRef = firebaseRef.child("mock")
 
-    override suspend fun getVideoList(): Task<ListResult> {
-        return mockDirRef.listAll()
+    override suspend fun getVideoList(): ListResult? {
+        return Tasks.await(mockDirRef.listAll())
     }
 
     override suspend fun uploadVideo(video: Video) {

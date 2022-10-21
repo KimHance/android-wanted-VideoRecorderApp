@@ -79,6 +79,9 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:30.5.0')
     implementation "com.google.firebase:firebase-storage-ktx"
 
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
+
     // ExoPlayer
     implementation "com.google.android.exoplayer:exoplayer-core:$player_version"
     implementation "com.google.android.exoplayer:exoplayer-dash:$player_version"

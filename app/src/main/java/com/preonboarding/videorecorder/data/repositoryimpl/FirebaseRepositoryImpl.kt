@@ -1,45 +1,50 @@
 package com.preonboarding.videorecorder.data.repositoryimpl
 
 import android.net.Uri
-import com.google.android.gms.tasks.Task
-import com.google.firebase.storage.StorageMetadata
-import android.net.Uri
 import android.util.Log
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.storage.FirebaseStorage
 import com.preonboarding.videorecorder.data.datasource.FirebaseDataSource
 import com.preonboarding.videorecorder.data.entity.RemoteVideo
+import com.preonboarding.videorecorder.di.DispatcherModule
 import com.preonboarding.videorecorder.domain.model.Video
 import com.preonboarding.videorecorder.domain.repository.FirebaseRepository
-import kotlinx.coroutines.coroutineScope
-import timber.log.Timber
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOn
 import java.io.File
 import javax.inject.Inject
 
 class FirebaseRepositoryImpl @Inject constructor(
     private val firebaseDataSource: FirebaseDataSource,
-    private val firebaseStorage: FirebaseStorage
+    private val firebaseStorage: FirebaseStorage,
+    @DispatcherModule.DispatcherIO private val dispatcherIO: CoroutineDispatcher
 ) : FirebaseRepository {
     var ref = firebaseStorage.reference
 
-    override suspend fun getVideoList() {
-        val videoList = mutableListOf<RemoteVideo>()
-
-        firebaseDataSource.getVideoList().addOnSuccessListener { result ->
-            Timber.e("${result.items.size}")
-            Timber.e("${result.items}")
-            result.items.forEach { reference ->
-                videoList.add(
+//    private val list = mutableListOf<RemoteVideo>()
+    override suspend fun getVideoList() = callbackFlow {
+        firebaseDataSource.getVideoList()?.items?.forEach { reference ->
+            val downloadUrl = reference.downloadUrl
+            val getMetadata = reference.metadata
+            Tasks.whenAll(
+                downloadUrl,
+                getMetadata
+            ).addOnSuccessListener {
+                val list = mutableListOf<RemoteVideo>()
+                list.add(
                     RemoteVideo(
                         videoName = reference.name,
-                        downloadUrl = getDownloadUrl(reference.downloadUrl),
-                        videoTimeStamp = getTimeMillis(reference.metadata)
+                        videoTimeStamp = getMetadata.result.creationTimeMillis.toString(),
+                        downloadUrl = downloadUrl.result.toString()
                     )
                 )
+                trySend(list)
             }
-
-            Timber.e("$videoList")
         }
-    }
+        awaitClose()
+    }.flowOn(dispatcherIO)
 
     override suspend fun uploadVideo(video: Video) {
         ref.child("test").child(video.date).putFile(

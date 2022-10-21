@@ -6,7 +6,7 @@ import com.preonboarding.videorecorder.domain.model.Video
 
 interface FirebaseDataSource {
 
-    suspend fun getVideoList(): Task<ListResult>
+    suspend fun getVideoList(): ListResult?
 
     suspend fun uploadVideo(video: Video)
 

@@ -36,7 +36,7 @@ class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
         collectFlow()
 
         initView()
-        listViewModel.getVideo_Test()
+        listViewModel.getVideo()
     }
 
     private fun initView() {
@@ -47,7 +47,7 @@ class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 listViewModel.videoList.collect { videoList ->
-                    // TODO 비디오 리스트 변경시 어댑터 리스트 업데이트 필요
+                    Timber.e("$videoList")
                 }
             }
         }

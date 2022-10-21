@@ -5,7 +5,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Video(
-    val date: String,
-    val title: String = "asdf",
-    val videoUrl: String
+    val date: String = "",
+    val title: String = "",
+    val videoUrl: String = "",
+    val uri: String = ""
 ) : Parcelable

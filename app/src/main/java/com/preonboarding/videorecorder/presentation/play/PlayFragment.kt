@@ -8,6 +8,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.util.Util
 import com.preonboarding.videorecorder.R
 import com.preonboarding.videorecorder.databinding.FragmentPlayBinding
 import com.preonboarding.videorecorder.domain.model.Video
@@ -52,19 +55,6 @@ class PlayFragment : BaseFragment<FragmentPlayBinding>(R.layout.fragment_play) {
         }
     }
 
-//    private fun collectFlow() {
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                playVideoModel.selectedVideo.collect { video ->
-//                    // TODO 선택된 비디오 ExoPlayer와 작업 필요
-//                }
-//            }
-//        }
-//    }
-//
-//    private fun getSelectedVideo() {
-//        playVideoModel.setSelectedVideo(navArgs.video)
-//    }
     private fun collectFlow() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
