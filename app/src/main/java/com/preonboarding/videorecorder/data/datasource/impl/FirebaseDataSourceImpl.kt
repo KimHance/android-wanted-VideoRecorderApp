@@ -12,25 +12,22 @@ import javax.inject.Inject
 
 
 class FirebaseDataSourceImpl @Inject constructor(
-    private val firebaseStorage: FirebaseStorage
+    firebaseStorage: FirebaseStorage
 ) : FirebaseDataSource {
 
-    // Mock Video Reference
     private val firebaseRef = firebaseStorage.reference
-//    private val mockDirRef = firebaseRef.child("mock")
-
-    private val testDirRef = firebaseRef.child("test")
+    private val videoDirRef = firebaseRef.child("video")
 
     override suspend fun getVideoList(): MutableList<StorageReference> {
-        return Tasks.await(testDirRef.listAll()).items
+        return Tasks.await(videoDirRef.listAll()).items
     }
 
-    override suspend fun uploadVideo(video: Video) {
-        //TODO
+    override suspend fun uploadVideo(video: Video): StorageReference {
+        return videoDirRef.child(video.date)
     }
 
     override suspend fun deleteVideo(video: Video): Task<Void> {
-        val deleteRef = testDirRef.child(video.title)
+        val deleteRef = videoDirRef.child(video.title)
         return deleteRef.delete()
     }
 }

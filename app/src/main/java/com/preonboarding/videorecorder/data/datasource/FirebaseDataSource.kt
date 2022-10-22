@@ -8,7 +8,7 @@ interface FirebaseDataSource {
 
     suspend fun getVideoList(): MutableList<StorageReference>
 
-    suspend fun uploadVideo(video: Video)
+    suspend fun uploadVideo(video: Video): StorageReference
 
     suspend fun deleteVideo(video: Video): Task<Void>
 }

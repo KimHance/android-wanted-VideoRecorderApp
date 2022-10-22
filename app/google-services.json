@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "816845224999",
-    "project_id": "wanted-videorecorderapp",
-    "storage_bucket": "wanted-videorecorderapp.appspot.com"
+    "project_number": "366943441445",
+    "project_id": "wanted-videorecorder-81efb",
+    "storage_bucket": "wanted-videorecorder-81efb.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:816845224999:android:a733c2d7b07029c46b6202",
+        "mobilesdk_app_id": "1:366943441445:android:fcf92a3be4a47c9e2ce5cc",
         "android_client_info": {
           "package_name": "com.preonboarding.videorecorder"
         }
       },
       "oauth_client": [
         {
-          "client_id": "816845224999-4a8f1qbmmajfaqvrrocj8mg28cc3d6eb.apps.googleusercontent.com",
+          "client_id": "366943441445-a5sncpo9k0htj3o51f3qo2nqg8s87s8q.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAl8yOu5lryAvvmmVo8p1skXqDrZYKxw2s"
+          "current_key": "AIzaSyD6Og0p6XCmqXXzVbGwraT5CX7-xr_tQzw"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "816845224999-4a8f1qbmmajfaqvrrocj8mg28cc3d6eb.apps.googleusercontent.com",
+              "client_id": "366943441445-a5sncpo9k0htj3o51f3qo2nqg8s87s8q.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
