@@ -7,6 +7,7 @@ import com.google.firebase.storage.ListResult
 import com.google.firebase.storage.StorageReference
 import com.preonboarding.videorecorder.data.datasource.FirebaseDataSource
 import com.preonboarding.videorecorder.domain.model.Video
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -28,7 +29,8 @@ class FirebaseDataSourceImpl @Inject constructor(
         //TODO
     }
 
-    override suspend fun deleteVideo(video: Video) {
-        //TODO
+    override suspend fun deleteVideo(video: Video): Task<Void> {
+        val deleteRef = testDirRef.child(video.title)
+        return deleteRef.delete()
     }
 }

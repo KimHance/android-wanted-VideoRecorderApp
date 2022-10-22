@@ -16,7 +16,8 @@ import com.preonboarding.videorecorder.domain.model.Video
  */
 class VideoAdapter(
     private val onItemClicked: (Video) -> Unit,
-    private val onItemLongClicked: (String) -> Unit
+    private val onItemLongClicked: (String) -> Unit,
+    private val onItemDeleted: (Video) -> Unit
 ) : ListAdapter<Video, VideoAdapter.VideoViewHolder>(VIDEO_DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
@@ -26,14 +27,16 @@ class VideoAdapter(
     }
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
-        holder.bindItems(getItem(position), onItemClicked, onItemLongClicked)
+        holder.bindItems(getItem(position), onItemClicked, onItemLongClicked, onItemDeleted)
     }
 
-    class VideoViewHolder(private val binding: ItemVideoInfoBinding) : RecyclerView.ViewHolder(binding.root) {
+    class VideoViewHolder(private val binding: ItemVideoInfoBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bindItems(
             item: Video,
             onItemClicked: (Video) -> Unit,
-            onItemLongClicked: (String) -> Unit
+            onItemLongClicked: (String) -> Unit,
+            onItemDeleted: (Video) -> Unit
         ) {
             with(binding) {
                 video = item
@@ -47,6 +50,10 @@ class VideoAdapter(
                 cvVideo.setOnClickListener {
                     onItemClicked.invoke(item)
                 }
+
+                tvDelete.setOnClickListener {
+                    onItemDeleted.invoke(item)
+                }
             }
         }
     }
@@ -54,7 +61,7 @@ class VideoAdapter(
     companion object {
         private val VIDEO_DIFF_CALLBACK = object : DiffUtil.ItemCallback<Video>() {
             override fun areItemsTheSame(oldItem: Video, newItem: Video): Boolean {
-                return oldItem.hashCode() == newItem.hashCode()  // 수정 필요
+                return oldItem.videoUrl == newItem.videoUrl  // 수정 필요
             }
 
             override fun areContentsTheSame(oldItem: Video, newItem: Video): Boolean {

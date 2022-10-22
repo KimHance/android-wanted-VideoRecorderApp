@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -57,6 +58,37 @@ class MainViewModel @Inject constructor(
                 //Log.d("Upload", "uploadVideo: SUCCES")
             }.onFailure {
                 //Log.d("Upload", "uploadVideo: FAIL")
+            }
+        }
+    }
+
+    fun deleteVideo(video: Video) {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                deleteVideoUseCase.invoke(video)
+            }.onSuccess {
+                launch {
+                    _videoList.update {
+                        emptyList()
+                    }
+                    getVideoListUseCase.invoke().collect { video ->
+
+                        Timber.e("1. ${_videoList.value}")
+
+                        val listBuffer = mutableListOf<Video>().apply {
+                            addAll(_videoList.value)
+                            add(video)
+                        }
+
+                        Timber.e("2. $listBuffer")
+
+                        _videoList.update {
+                            listBuffer
+                        }
+
+                        Timber.e("3. ${_videoList.value}")
+                    }
+                }
             }
         }
     }

@@ -5,13 +5,14 @@ import android.util.Log
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.storage.FirebaseStorage
 import com.preonboarding.videorecorder.data.datasource.FirebaseDataSource
-import com.preonboarding.videorecorder.data.entity.RemoteVideo
 import com.preonboarding.videorecorder.di.DispatcherModule
 import com.preonboarding.videorecorder.domain.model.Video
 import com.preonboarding.videorecorder.domain.repository.FirebaseRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import timber.log.Timber
 import java.io.File
@@ -56,9 +57,10 @@ class FirebaseRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteVideo(video: Video) {
-//        success {
-//            getVideoList()
-//        }
-
+        firebaseDataSource.deleteVideo(video).addOnSuccessListener {
+            Timber.e("Success")
+        }.addOnFailureListener {
+            it.printStackTrace()
+        }
     }
 }

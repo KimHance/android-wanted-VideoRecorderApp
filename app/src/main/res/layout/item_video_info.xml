@@ -46,17 +46,28 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/iv_video_name"
+                    android:id="@+id/tv_video_name"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@{video.title}"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="@id/iv_video_thumbnail"
+                    app:layout_constraintEnd_toStartOf="@id/tv_delete"
                     app:layout_constraintStart_toStartOf="@id/iv_video_thumbnail"
                     app:layout_constraintTop_toBottomOf="@id/iv_video_thumbnail"
                     tools:text="mock_video.mp4" />
+
+                <TextView
+                    android:id="@+id/tv_delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="삭제하기"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="18sp"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_video_name"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tv_video_name" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
