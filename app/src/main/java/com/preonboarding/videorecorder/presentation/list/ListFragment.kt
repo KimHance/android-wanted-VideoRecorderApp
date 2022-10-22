@@ -78,16 +78,5 @@ class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
 
     private fun deleteItem(video: Video) {
         listViewModel.deleteVideo(video)
-
-    }
-
-    private fun updateList() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                listViewModel.videoList.collect { videoList ->
-                    videoAdapter.submitList(videoList)
-                }
-            }
-        }
     }
 }

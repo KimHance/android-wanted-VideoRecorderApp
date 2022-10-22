@@ -32,6 +32,9 @@ class MainViewModel @Inject constructor(
 
     fun getVideoList() {
         viewModelScope.launch {
+            _videoList.update {
+                emptyList()
+            }
             getVideoListUseCase.invoke().collect { video ->
                 val listBuffer = mutableListOf<Video>().apply {
                     addAll(_videoList.value)
