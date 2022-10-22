@@ -5,7 +5,7 @@ import com.preonboarding.videorecorder.domain.model.Video
 import kotlinx.coroutines.flow.Flow
 
 interface FirebaseRepository {
-    suspend fun getVideoList(): Flow<List<RemoteVideo>>
+    suspend fun getVideoList(): Flow<Video>
 
     suspend fun uploadVideo(video: Video)
 

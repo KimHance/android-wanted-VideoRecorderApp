@@ -37,6 +37,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -112,15 +113,14 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                 if (cameraFacing == CameraSelector.DEFAULT_FRONT_CAMERA) {
                     cameraFacing = CameraSelector.DEFAULT_BACK_CAMERA
                     initCamera(cameraFacing)
-                }
-                else{
+                } else {
                     cameraFacing = CameraSelector.DEFAULT_FRONT_CAMERA
                     initCamera(cameraFacing)
                 }
                 try {
 
+                } catch (_: Exception) {
                 }
-                catch (_: Exception) { }
             }
 
         }
@@ -153,7 +153,7 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
     }
 
     //@RequiresPermission(Manifest.permission.CAMERA)
-    private fun initCamera(cameraFacing:CameraSelector) {
+    private fun initCamera(cameraFacing: CameraSelector) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
         cameraProviderFuture.addListener({
@@ -174,13 +174,14 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                     preview,
                     videoCapture
                 )
-                binding.seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+                binding.seekbar.setOnSeekBarChangeListener(object :
+                    SeekBar.OnSeekBarChangeListener {
                     override fun onProgressChanged(
                         seekBar: SeekBar?,
                         progress: Int,
                         fromUser: Boolean
                     ) {
-                       myCamera.cameraControl.setLinearZoom(progress/100.toFloat())
+                        myCamera.cameraControl.setLinearZoom(progress / 100.toFloat())
                     }
 
                     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -201,10 +202,6 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
             .build()
         videoCapture = VideoCapture.withOutput(recorder)
     }
-
-
-
-
 
 
     private fun startRecord() {
@@ -322,8 +319,10 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                                     .toString()
 
                             val recordedVideo = Video(
-                                nowDate, getPath(recordEvent.outputResults.outputUri)
+                                date = nowDate,
+                                videoUrl = getPath(recordEvent.outputResults.outputUri)
                             )
+
                             Log.d(TAG, "$nowDate : $recordEvent.outputResults.outputUri.toString()")
                             soundpool?.play(sound, 1f, 1f, 0, 0, 1f)
                             pauseTime = 0L
@@ -351,6 +350,7 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
     }
 
     private fun saveFireBase(recordedVideo: Video) {
+        Timber.e("$recordedVideo")
         recordVideoModel.uploadVideo(recordedVideo)
     }
 

@@ -37,7 +37,7 @@ class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
         collectFlow()
 
         initView()
-        listViewModel.getVideo()
+        listViewModel.getVideoList()
     }
 
     private fun initView() {
@@ -52,6 +52,7 @@ class ListFragment : BaseFragment<FragmentListBinding>(R.layout.fragment_list) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 listViewModel.videoList.collect { videoList ->
+                    videoAdapter.submitList(videoList)
                     Timber.e("$videoList")
                 }
             }

@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
+import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 
@@ -23,24 +24,22 @@ class FirebaseRepositoryImpl @Inject constructor(
 ) : FirebaseRepository {
     var ref = firebaseStorage.reference
 
-//    private val list = mutableListOf<RemoteVideo>()
+    //    private val list = mutableListOf<RemoteVideo>()
     override suspend fun getVideoList() = callbackFlow {
-        firebaseDataSource.getVideoList()?.items?.forEach { reference ->
+        firebaseDataSource.getVideoList().map { reference ->
             val downloadUrl = reference.downloadUrl
             val getMetadata = reference.metadata
             Tasks.whenAll(
                 downloadUrl,
                 getMetadata
             ).addOnSuccessListener {
-                val list = mutableListOf<RemoteVideo>()
-                list.add(
-                    RemoteVideo(
-                        videoName = reference.name,
-                        videoTimeStamp = getMetadata.result.creationTimeMillis.toString(),
-                        downloadUrl = downloadUrl.result.toString()
+                trySend(
+                    Video(
+                        date = getMetadata.result.creationTimeMillis.toString(),
+                        title = reference.name,
+                        videoUrl = downloadUrl.result.toString()
                     )
                 )
-                trySend(list)
             }
         }
         awaitClose()
@@ -48,7 +47,7 @@ class FirebaseRepositoryImpl @Inject constructor(
 
     override suspend fun uploadVideo(video: Video) {
         ref.child("test").child(video.date).putFile(
-            Uri.fromFile(File(video.uri))
+            Uri.fromFile(File(video.videoUrl))
         ).addOnSuccessListener {
             Log.d("UPLOAD SUCCESS", "uploadVideo: ${video.uri}")
         }.addOnFailureListener {
@@ -57,6 +56,9 @@ class FirebaseRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteVideo(video: Video) {
-        //TODO
+//        success {
+//            getVideoList()
+//        }
+
     }
 }
