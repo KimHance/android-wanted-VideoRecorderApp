@@ -18,12 +18,9 @@ import timber.log.Timber
 
 class FirebaseRepositoryImpl @Inject constructor(
     private val firebaseDataSource: FirebaseDataSource,
-    private val firebaseStorage: FirebaseStorage,
     @DispatcherModule.DispatcherIO private val dispatcherIO: CoroutineDispatcher
 ) : FirebaseRepository {
-    var ref = firebaseStorage.reference
 
-    //    private val list = mutableListOf<RemoteVideo>()
     override suspend fun getVideoList() = callbackFlow {
         firebaseDataSource.getVideoList().map { reference ->
             val downloadUrl = reference.downloadUrl
@@ -45,7 +42,7 @@ class FirebaseRepositoryImpl @Inject constructor(
     }.flowOn(dispatcherIO)
 
     override suspend fun uploadVideo(video: Video) {
-        ref.child("test").child(video.date).putFile(
+        firebaseDataSource.uploadVideo(video).putFile(
             Uri.fromFile(File(video.videoUrl))
         ).addOnSuccessListener {
             Log.d("UPLOAD SUCCESS", "uploadVideo: ${video.uri}")
