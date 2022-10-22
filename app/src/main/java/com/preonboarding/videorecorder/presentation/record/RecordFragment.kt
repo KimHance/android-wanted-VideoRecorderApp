@@ -313,7 +313,6 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                                 msg,
                                 Snackbar.LENGTH_SHORT
                             ).show()
-                            Log.d(TAG, msg)
                             val nowDate =
                                 SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(System.currentTimeMillis())
                                     .toString()
@@ -322,18 +321,12 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
                                 date = nowDate,
                                 videoUrl = getPath(recordEvent.outputResults.outputUri)
                             )
-
-                            Log.d(TAG, "$nowDate : $recordEvent.outputResults.outputUri.toString()")
                             soundpool?.play(sound, 1f, 1f, 0, 0, 1f)
                             pauseTime = 0L
                             saveFireBase(recordedVideo)
                         } else {
                             recording?.close()
                             recording = null
-                            Log.e(
-                                TAG, "Video capture ends with error: " +
-                                        "${recordEvent.error}"
-                            )
                         }
                     }
                 }
@@ -354,12 +347,11 @@ class RecordFragment : BaseFragment<FragmentRecordBinding>(R.layout.fragment_rec
         recordVideoModel.uploadVideo(recordedVideo)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
         cameraExecutor.shutdown()
         binding.chronometer.stop()
         releaseSound()
+
+        super.onDestroyView()
     }
-
-
 }
