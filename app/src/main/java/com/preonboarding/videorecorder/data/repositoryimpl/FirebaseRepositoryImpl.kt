@@ -3,7 +3,6 @@ package com.preonboarding.videorecorder.data.repositoryimpl
 import android.net.Uri
 import android.util.Log
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.storage.FirebaseStorage
 import com.preonboarding.videorecorder.data.datasource.FirebaseDataSource
 import com.preonboarding.videorecorder.di.DispatcherModule
 import com.preonboarding.videorecorder.domain.model.Video
@@ -12,9 +11,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
+import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
-import timber.log.Timber
 
 class FirebaseRepositoryImpl @Inject constructor(
     private val firebaseDataSource: FirebaseDataSource,
@@ -45,7 +44,7 @@ class FirebaseRepositoryImpl @Inject constructor(
         firebaseDataSource.uploadVideo(video).putFile(
             Uri.fromFile(File(video.videoUrl))
         ).addOnSuccessListener {
-            Log.d("UPLOAD SUCCESS", "uploadVideo: ${video.uri}")
+            Log.d("UPLOAD SUCCESS", "uploadVideo: ${video.videoUrl}")
         }.addOnFailureListener {
             Log.d("UPLOAD FAIL", it.message.toString())
         }
