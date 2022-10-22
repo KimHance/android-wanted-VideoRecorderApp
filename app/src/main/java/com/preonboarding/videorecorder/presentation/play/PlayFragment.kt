@@ -13,12 +13,10 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.util.Util
 import com.preonboarding.videorecorder.R
 import com.preonboarding.videorecorder.databinding.FragmentPlayBinding
-import com.preonboarding.videorecorder.domain.model.Video
 import com.preonboarding.videorecorder.presentation.MainViewModel
 import com.preonboarding.videorecorder.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @AndroidEntryPoint
 class PlayFragment : BaseFragment<FragmentPlayBinding>(R.layout.fragment_play) {
