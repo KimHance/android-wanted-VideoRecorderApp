@@ -22,26 +22,31 @@
 
 ## 패키지
 ```
-└─videorecorder
-    ├─const
-    ├─data
-    │  ├─datasource
-    │  │  └─impl
-    │  └─repositoryimpl
-    ├─di
-    ├─domain
-    │  ├─model
-    │  ├─repository
-    │  └─usecase
-    ├─presentation
-    │  ├─base
-    │  ├─list
-    │  │  └─adapter
-    │  ├─play
-    │  │  └─adapter
-    │  └─record
-    └─utils
+├── const
+├── data
+│   ├── datasource
+│   │   └── impl
+│   ├── entity
+│   └── repositoryimpl
+├── di
+├── domain
+│   ├── mapper
+│   ├── model
+│   ├── repository
+│   └── usecase
+└── presentation
+    ├── base
+    ├── list
+    │   └── adapter
+    ├── play
+    │   └── adapter
+    └── record
 ```
+## 데모 영상
+
+https://user-images.githubusercontent.com/51078673/197353603-1340f032-a9f4-4bfe-86e2-66e6eb6c1f91.mp4
+
+
 
 ## 김현수
 
@@ -233,7 +238,7 @@ class FirebaseRepositoryImpl @Inject constructor(
 ) : FirebaseRepository {
 
     override suspend fun getVideoList() = callbackFlow {
-        firebaseDataSource.getVideoList()?.items?.forEach { reference ->
+        firebaseDataSource.getVideoList().map { reference ->
             val downloadUrl = reference.downloadUrl
             val getMetadata = reference.metadata
             Tasks.whenAll(
@@ -241,10 +246,10 @@ class FirebaseRepositoryImpl @Inject constructor(
                 getMetadata
             ).addOnSuccessListener {
                 trySend(
-                    RemoteVideo(
-                        videoName = reference.name,
-                        videoTimeStamp = getMetadata.result.creationTimeMillis.toString(),
-                        downloadUrl = downloadUrl.result.toString()
+                    Video(
+                        date = getMetadata.result.creationTimeMillis.toString(),
+                        title = reference.name,
+                        videoUrl = downloadUrl.result.toString()
                     )
                 )
             }
@@ -257,11 +262,73 @@ class FirebaseRepositoryImpl @Inject constructor(
 ```
 - `Tasks.whenAll`은 해당 Task가 모두 완료된 경우에만 `addOnSuccessListener`를 수행한다.
 
+<br>
+
+``` kotlin
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val getVideoListUseCase: GetVideoListUseCase,
+    private val uploadVideoUseCase: UploadVideoUseCase,
+    private val deleteVideoUseCase: DeleteVideoUseCase
+) : ViewModel() {
+
+    private val _videoList = MutableStateFlow<List<Video>>(emptyList())
+    val videoList = _videoList.asStateFlow()
+
+    ...
+
+    fun getVideoList() {
+        viewModelScope.launch {
+            _videoList.update {
+                emptyList()
+            }
+            getVideoListUseCase.invoke().collect { video ->
+                val listBuffer = mutableListOf<Video>().apply {
+                    addAll(_videoList.value)
+                    add(video)
+                }
+                _videoList.update {
+                    listBuffer
+                }
+            }
+        }
+    }
+    
+    ...
+    
+    fun deleteVideo(video: Video) {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                deleteVideoUseCase.invoke(video)
+            }.onSuccess {
+                launch {
+                    _videoList.update {
+                        emptyList()
+                    }
+                    
+                    getVideoListUseCase.invoke().collect { video ->
+                        val listBuffer = mutableListOf<Video>().apply {
+                            addAll(_videoList.value)
+                            add(video)
+                        }
+
+                        _videoList.update {
+                            listBuffer
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
 ### UI
 ```kotlin
 class VideoAdapter(
     private val onItemClicked: (Video) -> Unit,
-    private val onItemLongClicked: (String) -> Unit
+    private val onItemLongClicked: (String) -> Unit,
+    private val onItemDeleted: (Video) -> Unit
 ) : ListAdapter<Video, VideoAdapter.VideoViewHolder>(VIDEO_DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
@@ -271,14 +338,16 @@ class VideoAdapter(
     }
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
-        holder.bindItems(getItem(position), onItemClicked, onItemLongClicked)
+        holder.bindItems(getItem(position), onItemClicked, onItemLongClicked, onItemDeleted)
     }
 
-    class VideoViewHolder(private val binding: ItemVideoInfoBinding) : RecyclerView.ViewHolder(binding.root) {
+    class VideoViewHolder(private val binding: ItemVideoInfoBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bindItems(
             item: Video,
             onItemClicked: (Video) -> Unit,
-            onItemLongClicked: (String) -> Unit
+            onItemLongClicked: (String) -> Unit,
+            onItemDeleted: (Video) -> Unit
         ) {
             with(binding) {
                 video = item
@@ -292,6 +361,10 @@ class VideoAdapter(
                 cvVideo.setOnClickListener {
                     onItemClicked.invoke(item)
                 }
+
+                tvDelete.setOnClickListener {
+                    onItemDeleted.invoke(item)
+                }
             }
         }
     }
@@ -299,11 +372,39 @@ class VideoAdapter(
     companion object {
         private val VIDEO_DIFF_CALLBACK = object : DiffUtil.ItemCallback<Video>() {
             override fun areItemsTheSame(oldItem: Video, newItem: Video): Boolean {
-                return oldItem.hashCode() == newItem.hashCode()  // 수정 필요
+                return oldItem.videoUrl == newItem.videoUrl
             }
 
             override fun areContentsTheSame(oldItem: Video, newItem: Video): Boolean {
                 return oldItem == newItem
+            }
+        }
+    }
+}
+```
+
+<br>
+
+### 동영상 5초 프리뷰
+- Player.Listener 사용
+
+``` kotlin
+private fun exoPreviewListener() = object : Player.Listener {
+
+    ...
+
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+        super.onIsPlayingChanged(isPlaying)
+  
+        if (isPlaying) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                delay(5000L)
+                releasePlayer()
+                dialog?.dismiss()
+            }
+        } else {
+            if (exoPlayer?.currentPosition!! >= 5000) {
+                dialog?.dismiss()
             }
         }
     }
